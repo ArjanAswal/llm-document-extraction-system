@@ -1,0 +1,41 @@
+{
+  "name": "llm-document-extraction-system",
+  "version": "1.0.0",
+  "description": "LLM-powered multilingual utility invoice extraction pipeline",
+  "type": "module",
+  "main": "dist/cli/extract.js",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "vitest run --config vitest.live.config.ts",
+    "extract": "tsx src/cli/extract.ts"
+  },
+  "keywords": [
+    "llm",
+    "invoice",
+    "extraction",
+    "gemini",
+    "langchain"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.48",
+    "@langchain/google-genai": "^2.1.31",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^17.4.2",
+    "franc": "^6.2.0",
+    "pdf-parse": "^2.4.5",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  }
+}
