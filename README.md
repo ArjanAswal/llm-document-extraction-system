@@ -112,6 +112,19 @@ docs/             # invariants, commits, phase gates
 | `npm run test:live` | Live Gemini smoke test (requires API key) |
 | `npm run build` | Compile TypeScript to `dist/` |
 
+## Testing approach
+
+Full write-up: **[TESTING.md](TESTING.md)**. Summary:
+
+1. **Accuracy validation** — Manual spot-check of all 5 PDFs against `output/extracted_invoices.csv`, plus Zod parsing and cross-field validation rules.
+2. **Edge cases** — Missing dates/fields, English/Spanish/French invoices, US vs EU dates, unit variants (kWh, therms, m³, CCF), ambiguous usage.
+3. **Automated tests** — **45** Vitest tests (schema, normalizer, validator, PDF extract, language detect, mocked pipeline). Optional live Gemini test: `npm run test:live`.
+4. **Future improvements** — Golden-file CSV regression, labeled ground truth, field-level metrics, calibrated confidence, retry on low confidence.
+
+```bash
+npm test
+```
+
 ## Tradeoffs (4-hour scope)
 
 - LLM self-confidence scores, not calibrated metrics

@@ -1,56 +1,78 @@
 # Testing approach
 
-## How accuracy was validated
+This document satisfies the assignment **Testing Approach** deliverable. A short summary also appears in [README.md](README.md#testing-approach).
 
-### Automated tests (41 tests)
+---
 
-| Area | Tests | Notes |
-|------|-------|-------|
-| Schema | `tests/domain/invoice.schema.test.ts` | Valid/invalid records, nullable fields |
-| Normalizer | `tests/domain/normalizer.test.ts` | US/EU dates, unit aliases, synonyms |
-| Validator | `tests/domain/invoice.validator.test.ts` | Each warning code |
-| PDF extract | `tests/services/pdf-text-extractor.test.ts` | Real fixture PDF |
-| Language | `tests/services/language-detector.test.ts` | franc on full PDF text |
-| Pipeline | `tests/services/pipeline.test.ts` | Mocked LLM, port injection |
-| Live (optional) | `tests/services/pipeline.live.test.ts` | Skipped without `GOOGLE_API_KEY` |
+## 1. How we validated accuracy of extracted fields
 
-Run: `npm test` (mocked) · `npm run test:live` (real API)
+Validation used **two layers**: automated checks plus manual review against source PDFs.
 
-### Manual spot-check matrix
+### Manual spot-check (ground truth = PDF text)
 
-| File | Expected utility | Language | Edge case | Observed |
-|------|------------------|----------|-----------|----------|
-| `invoice_01_electricity_us_clean.pdf` | electricity | en | complete | All fields populated, high confidence |
-| `invoice_02_gas_uk_missing_fields.pdf` | gas | en | missing end date | `billing_period_end` empty |
-| `invoice_03_agua_espanol_ambiguous.pdf` | water | es | ambiguous unit | `unit_type_mismatch` (m³ vs water heuristic) |
-| `invoice_04_electricite_francais_missing.pdf` | electricity | fr | French date format | `normalization_lenient`, invoice_date needed LLM fix |
-| `invoice_05_water_us_ambiguous.pdf` | water | en | ambiguous period | `billing_period_start` empty, `unit_type_mismatch` (CCF) |
+Each of the five fixtures was opened as PDF text (`pdf-parse`) and compared to `output/extracted_invoices.csv`:
 
-Regenerate CSV: `npm run extract`
+| File | Key checks | Result |
+|------|------------|--------|
+| `invoice_01_electricity_us_clean.pdf` | 663 kWh, Mar 15 2024, Pacific Grid | Matches |
+| `invoice_02_gas_uk_missing_fields.pdf` | 243 therms, no billing end date | Matches (empty `billing_period_end`) |
+| `invoice_03_agua_espanol_ambiguous.pdf` | 23 m³ water, Spanish, Enero 2024 | Matches |
+| `invoice_04_electricite_francais_missing.pdf` | 417 kWh, no invoice date on bill | Matches (empty `invoice_date`, warning set) |
+| `invoice_05_water_us_ambiguous.pdf` | 18 CCF, no billing start on bill | Matches (empty `billing_period_start`) |
 
-## Edge cases considered
+Regenerate and re-check: `npm run extract -- --input invoices --output output/extracted_invoices.csv`
 
-- **Missing fields** — nullable columns, `missing_required_field` warning
-- **Ambiguous usage** — null `usage_amount`, lower field confidence
-- **Multilingual** — ES/FR detection on full PDF text (not short snippets)
-- **Unit variants** — kWh, therms, gallons, m³; CCF triggers mismatch warning
-- **Date formats** — US MM/DD, EU DD/MM, ISO; French prose dates may need lenient fallback
+### Automated structural validation
 
-## Bonus validation expectations
+- **Zod schemas** enforce types, enums (`electricity` / `gas` / `water`), and ISO dates before rows are written.
+- **`invoice.validator.ts`** adds cross-field rules (billing period order, unit vs utility type, missing fields).
+- **Warnings** in `validation_warnings` flag rows that need human review without dropping them.
 
-| Fixture | Expected warnings | Confidence notes |
-|---------|-------------------|------------------|
-| invoice_01 | none/minimal | extraction_confidence ? 1.0 |
-| invoice_02 | possibly missing field | high overall, low billing_period_end field score |
-| invoice_03 | unit_type_mismatch | high extraction despite ambiguous unit |
-| invoice_04 | normalization_lenient | invoice_date field_confidence = 0 |
-| invoice_05 | unit_type_mismatch, missing period | usage_amount extracted but CCF not in canonical set |
+---
 
-## With more time
+## 2. Test cases and edge cases considered
 
-- Golden-file CSV regression tests per fixture
-- Calibrated confidence (human labels + score correlation)
-- Retry/fallback when extraction_confidence &lt; threshold
-- Batch API for cost reduction at scale
-- Expand unit map (CCF ? gallons conversion)
-- Field-level eval harness with labeled ground truth
+| Edge case | Fixture / test | Expected behavior |
+|-----------|----------------|-------------------|
+| **Missing fields** | `invoice_02` (no end date), `invoice_05` (no start date) | Empty CSV cells |
+| **Missing invoice date** | `invoice_04` (French; date not printed) | Empty `invoice_date` + `missing_required_field` |
+| **Different languages** | `invoice_03` (ES), `invoice_04` (FR) | Gemini extracts without translation; `detected_language` = `es` / `fr` |
+| **US vs EU date formats** | `normalizer.test.ts` | MM/DD vs DD/MM ? ISO `YYYY-MM-DD` |
+| **Unit variations** | kWh, therms, m³, CCF | Aliases normalized; validator accepts water + m³/CCF |
+| **Ambiguous usage** | `invoice_03`, `invoice_05` | Best-effort amount; null when unclear |
+| **Empty PDF text** | `pdf-text-extractor.test.ts` | Readable error if extraction fails |
+| **LLM variability** | `pipeline.test.ts` (mocked) | Deterministic tests without API cost |
+
+---
+
+## 3. Automated tests (implemented)
+
+**45 tests** via Vitest (`npm test`). No API key required for the default suite.
+
+| Suite | File | What it covers |
+|-------|------|----------------|
+| Schema | `tests/domain/invoice.schema.test.ts` | Valid/invalid rows, nullable `invoice_date` |
+| Normalizer | `tests/domain/normalizer.test.ts` | Dates, units, multilingual utility synonyms |
+| Validator | `tests/domain/invoice.validator.test.ts` | Warning codes, m³/CCF for water |
+| PDF | `tests/services/pdf-text-extractor.test.ts` | Non-empty text from real PDF |
+| Language | `tests/services/language-detector.test.ts` | franc on full invoice PDFs |
+| Extractor shape | `tests/services/invoice-extractor.test.ts` | LLM output schema + confidence |
+| Pipeline | `tests/services/pipeline.test.ts` | End-to-end with **mocked** LLM + port injection |
+| Live (optional) | `tests/services/pipeline.live.test.ts` | One real Gemini call if `GOOGLE_API_KEY` is set |
+
+```bash
+npm test              # mocked suite (CI-friendly)
+npm run test:live     # optional real API smoke test
+```
+
+---
+
+## 4. How we would improve testing with more time
+
+- **Golden-file regression**: commit expected CSV per fixture; fail CI on drift.
+- **Labeled ground truth**: spreadsheet of correct field values per PDF for precision/recall metrics.
+- **Field-level eval**: score each column separately (date parsing, usage amount, etc.).
+- **Calibrated confidence**: correlate LLM `extraction_confidence` with human labels.
+- **Retry policy**: re-prompt when confidence &lt; threshold or validation fails.
+- **Fuzz / property tests**: random date strings through normalizer.
+- **CI with live API**: gated job with secret, rate limits, and cost caps.
