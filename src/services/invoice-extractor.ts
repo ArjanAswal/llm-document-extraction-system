@@ -16,7 +16,7 @@ Rules:
 - Normalize dates to ISO 8601 (YYYY-MM-DD) when possible
 - usage_amount must be numeric only (no units in the number)
 - Preserve vendor_name and service_address as printed
-- Use null for missing, ambiguous, or unreadable fields
+- Use null for missing, ambiguous, or unreadable fields (e.g. when no invoice date is printed, set invoice_date to null)
 - extraction_confidence: 0ù1 certainty for the whole record (use < 0.5 when fields are missing or ambiguous)
 - field_confidence: optional per-field scores 0ù1 for each core field`;
 

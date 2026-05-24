@@ -19,8 +19,7 @@ export function normalizeExtractionLenient(
 
   return {
     vendor_name: raw.vendor_name?.trim() || "Unknown Vendor",
-    invoice_date:
-      normalizeDate(raw.invoice_date, localeHint) ?? "1970-01-01",
+    invoice_date: normalizeDate(raw.invoice_date, localeHint),
     service_address: raw.service_address?.trim() || null,
     utility_type: normalizeUtilityType(raw.utility_type) ?? "electricity",
     usage_amount: normalizeUsageAmount(raw.usage_amount),

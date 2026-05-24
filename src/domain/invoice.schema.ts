@@ -32,7 +32,7 @@ export const LlmExtractionSchema = z.object({
 /** Normalized core fields before metadata merge */
 export const NormalizedExtractionSchema = z.object({
   vendor_name: z.string().min(1),
-  invoice_date: z.string().regex(isoDateRegex),
+  invoice_date: z.string().regex(isoDateRegex).nullable(),
   service_address: z.string().nullable(),
   utility_type: UtilityType,
   usage_amount: z.number().nullable(),
@@ -46,7 +46,7 @@ export const NormalizedExtractionSchema = z.object({
 /** Full CSV row including metadata and validation */
 export const InvoiceRecordSchema = z.object({
   vendor_name: z.string().min(1),
-  invoice_date: z.string().regex(isoDateRegex),
+  invoice_date: z.string().regex(isoDateRegex).nullable(),
   service_address: z.string().nullable(),
   utility_type: UtilityType,
   usage_amount: z.number().nullable(),

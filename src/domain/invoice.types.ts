@@ -20,7 +20,7 @@ export interface LlmExtraction {
 
 export type InvoiceRecord = {
   vendor_name: string;
-  invoice_date: string;
+  invoice_date: string | null;
   service_address: string | null;
   utility_type: UtilityType;
   usage_amount: number | null;

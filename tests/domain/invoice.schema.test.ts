@@ -27,6 +27,15 @@ describe("InvoiceRecordSchema", () => {
     expect(InvoiceRecordSchema.parse(validRecord)).toEqual(validRecord);
   });
 
+  it("accepts null invoice_date when missing on source document", () => {
+    const partial = {
+      ...validRecord,
+      invoice_date: null,
+      validation_warnings: "missing_required_field",
+    };
+    expect(InvoiceRecordSchema.parse(partial)).toBeDefined();
+  });
+
   it("accepts null optional fields", () => {
     const partial = {
       ...validRecord,

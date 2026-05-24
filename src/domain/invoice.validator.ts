@@ -8,11 +8,17 @@ export interface ValidationResult {
 const UNIT_TYPE_MAP: Record<string, string[]> = {
   electricity: ["kwh"],
   gas: ["therms", "therm"],
-  water: ["gallons", "gal", "m³", "m3"],
+  water: ["gallons", "gal", "m3", "ccf"],
 };
 
 function normalizeUnitKey(unit: string): string {
-  return unit.toLowerCase().replace("³", "3");
+  return unit.toLowerCase().replace(/\u00b3/g, "3").trim();
+}
+
+function unitsMatch(actualUnit: string, expectedUnit: string): boolean {
+  const actual = normalizeUnitKey(actualUnit);
+  const expected = normalizeUnitKey(expectedUnit);
+  return actual === expected || actual.includes(expected) || expected.includes(actual);
 }
 
 function addDays(date: Date, days: number): Date {
@@ -36,8 +42,12 @@ export function validateInvoice(record: NormalizedExtraction): ValidationResult 
 
   const tomorrow = addDays(new Date(), 1);
   const tomorrowIso = tomorrow.toISOString().slice(0, 10);
-  if (record.invoice_date > tomorrowIso) {
+  if (record.invoice_date && record.invoice_date > tomorrowIso) {
     warnings.push("future_invoice_date");
+  }
+
+  if (!record.invoice_date) {
+    warnings.push("missing_required_field");
   }
 
   if (!record.service_address) {
@@ -51,11 +61,8 @@ export function validateInvoice(record: NormalizedExtraction): ValidationResult 
   }
 
   if (record.usage_unit) {
-    const unitKey = normalizeUnitKey(record.usage_unit);
     const expectedUnits = UNIT_TYPE_MAP[record.utility_type] ?? [];
-    const matches = expectedUnits.some(
-      (u) => unitKey.includes(u) || u.includes(unitKey),
-    );
+    const matches = expectedUnits.some((u) => unitsMatch(record.usage_unit!, u));
     if (!matches && expectedUnits.length > 0) {
       warnings.push("unit_type_mismatch");
     }

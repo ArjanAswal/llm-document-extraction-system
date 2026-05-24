@@ -26,6 +26,7 @@ const UNIT_ALIASES: Record<string, string> = {
   gallon: "gallons",
   gal: "gallons",
   gals: "gallons",
+  ccf: "CCF",
   m3: CUBIC_M,
   [CUBIC_M]: CUBIC_M,
   "cubic meters": CUBIC_M,
@@ -136,7 +137,7 @@ export function normalizeExtraction(
   const invoiceDate = normalizeDate(raw.invoice_date, localeHint);
   const vendorName = raw.vendor_name?.trim();
 
-  if (!vendorName || !utilityType || !invoiceDate) {
+  if (!vendorName || !utilityType) {
     return null;
   }
 

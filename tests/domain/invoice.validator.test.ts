@@ -70,6 +70,33 @@ describe("validateInvoice", () => {
     );
     expect(result.warnings).toContain("unit_type_mismatch");
   });
+
+  it("accepts m³ for water", () => {
+    const result = validateInvoice(
+      baseRecord({
+        utility_type: "water",
+        usage_unit: "m\u00B3",
+        usage_amount: 23,
+      }),
+    );
+    expect(result.warnings).not.toContain("unit_type_mismatch");
+  });
+
+  it("accepts CCF for water", () => {
+    const result = validateInvoice(
+      baseRecord({
+        utility_type: "water",
+        usage_unit: "CCF",
+        usage_amount: 18,
+      }),
+    );
+    expect(result.warnings).not.toContain("unit_type_mismatch");
+  });
+
+  it("warns when invoice_date is missing", () => {
+    const result = validateInvoice(baseRecord({ invoice_date: null }));
+    expect(result.warnings).toContain("missing_required_field");
+  });
 });
 
 describe("appendPipelineWarnings", () => {
