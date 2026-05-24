@@ -14,13 +14,12 @@ Co-authored-by: Cursor <agent@cursor.com>
 
 ## Types
 
-| Type | Use for |
-|------|---------|
+| Type    | Use for                     |
+| ------- | --------------------------- |
 | `chore` | Tooling, config, meta files |
-| `feat` | New features |
-| `fix` | Bug fixes |
-| `test` | Tests only |
-| `docs` | Documentation |
+| `feat`  | New features                |
+| `fix`   | Bug fixes                   |
+| `test`  | Tests only                  |
 
 ## Scopes
 
