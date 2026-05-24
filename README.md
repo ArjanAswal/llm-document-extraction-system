@@ -13,10 +13,10 @@ npm test
 
 ### Environment variables
 
-| Variable | Required | Default |
-|----------|----------|---------|
-| `GOOGLE_API_KEY` | Yes | — |
-| `GEMINI_MODEL` | No | `gemini-3.1-flash-lite-preview` |
+| Variable         | Required | Default                         |
+| ---------------- | -------- | ------------------------------- |
+| `GOOGLE_API_KEY` | Yes      | ï¿½                               |
+| `GEMINI_MODEL`   | No       | `gemini-3.1-flash-lite-preview` |
 
 ## Architecture
 
@@ -35,13 +35,13 @@ flowchart LR
 
 ## Assumptions
 
-| Assumption | Rationale |
-|------------|-----------|
-| Text extracted via `pdf-parse` (no OCR) | Fixtures are ReportLab text PDFs |
-| Missing/ambiguous fields ? empty CSV cells | Nullable Zod fields |
-| Dates normalized to ISO 8601 | Consistent downstream use |
-| No translation layer | Gemini reads multilingual text natively |
-| franc is metadata-only | Debugging enrichment, not input transformation |
+| Assumption                                 | Rationale                                      |
+| ------------------------------------------ | ---------------------------------------------- |
+| Text extracted via `pdf-parse` (no OCR)    | Fixtures are ReportLab text PDFs               |
+| Missing/ambiguous fields ? empty CSV cells | Nullable Zod fields                            |
+| Dates normalized to ISO 8601               | Consistent downstream use                      |
+| No translation layer                       | Gemini reads multilingual text natively        |
+| franc is metadata-only                     | Debugging enrichment, not input transformation |
 
 ## Multilingual handling
 
@@ -59,22 +59,22 @@ flowchart LR
 
 ### Confidence scoring
 
-- `extraction_confidence` — LLM self-score for whole record
-- `field_confidence` — per-field JSON scores from LLM
-- `language_confidence` — franc top-2 score heuristic
+- `extraction_confidence` ï¿½ LLM self-score for whole record
+- `field_confidence` ï¿½ per-field JSON scores from LLM
+- `language_confidence` ï¿½ franc top-2 score heuristic
 - `low_extraction_confidence` warning when score &lt; 0.5
 
 ### Basic validation checks
 
 Cross-field rules in `invoice.validator.ts`:
 
-| Code | Rule |
-|------|------|
-| `invalid_billing_period` | start &gt; end |
-| `negative_usage` | usage &lt; 0 |
-| `future_invoice_date` | date &gt; tomorrow |
+| Code                     | Rule                         |
+| ------------------------ | ---------------------------- |
+| `invalid_billing_period` | start &gt; end               |
+| `negative_usage`         | usage &lt; 0                 |
+| `future_invoice_date`    | date &gt; tomorrow           |
 | `missing_required_field` | null usage, unit, or address |
-| `unit_type_mismatch` | e.g. gas + kWh |
+| `unit_type_mismatch`     | e.g. gas + kWh               |
 
 Warnings appear in `validation_warnings` (semicolon-separated). Rows are never dropped.
 
@@ -82,12 +82,12 @@ Warnings appear in `validation_warnings` (semicolon-separated). Rows are never d
 
 Port interfaces in `src/ports/`:
 
-- `TextExtractorPort` — swap OCR adapter later
-- `LanguageDetectorPort` — swap detection library
-- `InvoiceExtractorPort` — swap LLM provider
-- `OutputWriterPort` — add JSON output
+- `TextExtractorPort` ï¿½ swap OCR adapter later
+- `LanguageDetectorPort` ï¿½ swap detection library
+- `InvoiceExtractorPort` ï¿½ swap LLM provider
+- `OutputWriterPort` ï¿½ add JSON output
 
-Pipeline accepts injected deps via `resolvePipelineDeps()` — see `tests/services/pipeline.test.ts`.
+Pipeline accepts injected deps via `resolvePipelineDeps()` ï¿½ see `tests/services/pipeline.test.ts`.
 
 ## Project structure
 
@@ -105,21 +105,21 @@ docs/             # invariants, commits, phase gates
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run extract` | Run extraction pipeline |
-| `npm test` | Unit + integration tests (mocked LLM) |
+| Command             | Description                               |
+| ------------------- | ----------------------------------------- |
+| `npm run extract`   | Run extraction pipeline                   |
+| `npm test`          | Unit + integration tests (mocked LLM)     |
 | `npm run test:live` | Live Gemini smoke test (requires API key) |
-| `npm run build` | Compile TypeScript to `dist/` |
+| `npm run build`     | Compile TypeScript to `dist/`             |
 
 ## Testing approach
 
 Full write-up: **[TESTING.md](TESTING.md)**. Summary:
 
-1. **Accuracy validation** — Manual spot-check of all 5 PDFs against `output/extracted_invoices.csv`, plus Zod parsing and cross-field validation rules.
-2. **Edge cases** — Missing dates/fields, English/Spanish/French invoices, US vs EU dates, unit variants (kWh, therms, m³, CCF), ambiguous usage.
-3. **Automated tests** — **45** Vitest tests (schema, normalizer, validator, PDF extract, language detect, mocked pipeline). Optional live Gemini test: `npm run test:live`.
-4. **Future improvements** — Golden-file CSV regression, labeled ground truth, field-level metrics, calibrated confidence, retry on low confidence.
+1. **Accuracy validation** ï¿½ Manual spot-check of all 5 PDFs against `output/extracted_invoices.csv`, plus Zod parsing and cross-field validation rules.
+2. **Edge cases** ï¿½ Missing dates/fields, English/Spanish/French invoices, US vs EU dates, unit variants (kWh, therms, mï¿½, CCF), ambiguous usage.
+3. **Automated tests** ï¿½ **45** Vitest tests (schema, normalizer, validator, PDF extract, language detect, mocked pipeline). Optional live Gemini test: `npm run test:live`.
+4. **Future improvements** ï¿½ Golden-file CSV regression, labeled ground truth, field-level metrics, calibrated confidence, retry on low confidence.
 
 ```bash
 npm test
@@ -134,6 +134,5 @@ npm test
 
 ## See also
 
-- [TESTING.md](TESTING.md) — validation approach
-- [docs/INVARIANTS.md](docs/INVARIANTS.md) — project rules
-- [docs/VIDEO_OUTLINE.md](docs/VIDEO_OUTLINE.md) — demo script
+- [TESTING.md](TESTING.md) ï¿½ validation approach
+- [docs/INVARIANTS.md](docs/INVARIANTS.md) ï¿½ project rules
