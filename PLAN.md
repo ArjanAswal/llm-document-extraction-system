@@ -1,30 +1,37 @@
-# LLM Utility Invoice Extraction � Living Plan
-
-## Status
-
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 0 | Meta layer (rules, invariants, gates) | complete |
-| 1 | Bootstrap (TypeScript, Vitest) | complete |
-| 2 | Domain (schema, normalizer, validator, ports) | complete |
-| 3 | Services + CLI (pipeline, CSV output) | complete |
-| 4 | Documentation + deliverables | complete |
+# Project roadmap
 
 ## Objective
 
-Extract structured utility-invoice fields from multilingual PDFs using Gemini 3.1 Flash-Lite Preview, LangChain, and Zod; output CSV with bonus metadata (language detection, confidence scoring, validation warnings).
+Extract structured utility-invoice fields from multilingual PDFs using Gemini, LangChain, and Zod, then write the normalized records to CSV.
 
-## Key docs
+## Current capabilities
 
-- [README.md](README.md) � quickstart and architecture
-- [TESTING.md](TESTING.md) � validation approach
-- [Invariants](docs/INVARIANTS.md)
-- [Commit conventions](docs/COMMITS.md)
-- [Phase gates](docs/PHASES.md)
-- [Video outline](docs/VIDEO_OUTLINE.md)
+- Extract text from text-based PDFs.
+- Detect invoice language as metadata.
+- Extract structured invoice fields with Gemini.
+- Normalize dates, utility types, and units.
+- Record validation warnings without dropping rows.
+- Export stable, ordered CSV columns.
+
+## Roadmap
+
+- Add OCR support for scanned PDFs.
+- Add golden-file regression tests for extraction output.
+- Add labeled evaluation data and field-level quality metrics.
+- Calibrate confidence scores and add a retry policy.
+- Add additional output adapters such as JSON.
+- Add optional CI coverage for live API smoke tests.
+
+## Project documentation
+
+- [README.md](README.md) — quickstart and architecture
+- [TESTING.md](TESTING.md) — validation strategy and test suite
+- [docs/INVARIANTS.md](docs/INVARIANTS.md) — architecture and data contracts
+- [docs/COMMITS.md](docs/COMMITS.md) — commit conventions
+- [docs/PHASES.md](docs/PHASES.md) — release verification checklist
 
 ## Pipeline flow
 
-```
-PDF ? text ? franc (metadata) ? Gemini extract ? normalize ? validate ? CSV
+```text
+PDF → text → franc metadata → Gemini extraction → normalize → validate → CSV
 ```

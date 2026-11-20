@@ -1,52 +1,38 @@
-# Phase gates
+# Verification checklist
 
-Work stops at each gate for verification before continuing.
+Use this checklist before merging or releasing changes.
 
-## Phase 0 � Meta layer
+## Setup and build
 
-- [ ] `.cursor/rules/project.mdc` reflects plan-first + gate stops
-- [ ] `docs/INVARIANTS.md` matches multilingual / no-translation decision
-- [ ] `docs/COMMITS.md` co-author trailer present
-- [ ] `git log -1` shows expected message
+- [ ] `npm install` succeeds.
+- [ ] `npm run typecheck` succeeds.
+- [ ] `npm run build` emits `dist/`.
+- [ ] `.env.example` documents required variables.
+- [ ] No secrets or generated build files are staged.
 
-## Phase 1 � Bootstrap
+## Domain and data contract
 
-- [ ] `npm install` succeeds
-- [ ] `npm test` passes (smoke)
-- [ ] `npm run build` emits `dist/`
-- [ ] `.env.example` documents vars
+- [ ] `src/domain/invoice.schema.ts` remains the source of truth for extracted fields.
+- [ ] `CSV_COLUMNS` includes only intended output columns in the correct order.
+- [ ] Domain code has no LangChain, Gemini, or language-detection imports.
+- [ ] Normalizer and validator tests cover changed behavior.
 
-## Phase 2 � Domain
+## Pipeline and adapters
 
-- [ ] Schema matches brief + bonus columns in `CSV_COLUMNS`
-- [ ] Normalizer + validator tests green
-- [ ] Domain has zero LangChain imports
+- [ ] The pipeline depends on ports from `src/ports/`.
+- [ ] PDF extraction and language detection preserve the original text flow.
+- [ ] LLM calls remain centralized in `src/services/invoice-extractor.ts`.
+- [ ] Validation warnings are recorded without dropping rows.
 
-## Phase 3 � Services + CLI
+## Tests and manual checks
 
-- [ ] `npm run extract` processes all 5 PDFs
-- [ ] CSV has 5 rows + bonus columns
-- [ ] `npm test` passes (mocked suite)
+- [ ] `npm test` passes.
+- [ ] `npm run extract -- --input invoices --output output/extracted_invoices.csv` processes the sample PDFs.
+- [ ] The generated CSV has one row per PDF and the expected headers.
+- [ ] `npm run test:live` passes when intentionally testing the configured LLM API.
 
----
+## Documentation
 
-## Gate report template
-
-```markdown
-## Phase N Report
-
-### Done
-- [bullets]
-
-### Verification
-- Command outputs (test/build/extract)
-
-### git log
-(paste `git log --oneline -n 10`)
-
-### Decisions / feedback needed
-- [your notes]
-
-### Ready for Phase N+1?
-- [ ] Yes / [ ] Changes requested
-```
+- [ ] README quickstart and scripts are current.
+- [ ] Breaking CSV changes include a schema version update and migration note.
+- [ ] New environment variables are documented in `.env.example`.

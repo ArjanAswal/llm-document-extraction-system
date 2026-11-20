@@ -4,43 +4,39 @@
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 <type>(<scope>): <short description>
 
 [optional body]
-
-Co-authored-by: Cursor <agent@cursor.com>
 ```
 
 ## Types
 
-| Type    | Use for                     |
-| ------- | --------------------------- |
-| `chore` | Tooling, config, meta files |
-| `feat`  | New features                |
-| `fix`   | Bug fixes                   |
-| `test`  | Tests only                  |
+| Type       | Use for                                         |
+| ---------- | ----------------------------------------------- |
+| `chore`    | Tooling, configuration, and maintenance         |
+| `docs`     | Documentation only                              |
+| `feat`     | New features                                    |
+| `fix`      | Bug fixes                                       |
+| `refactor` | Internal restructuring without behavior changes |
+| `test`     | Tests only                                      |
 
-## Scopes
+## Suggested scopes
 
-`meta`, `bootstrap`, `domain`, `services`, `cli`
+`domain`, `services`, `cli`, `ports`, `tests`, `docs`, or `deps`.
 
 ## Examples
 
-```
-chore(meta): add cursor rules, invariants, and phase gates
-
-Co-authored-by: Cursor <agent@cursor.com>
+```text
+chore(deps): update LangChain packages
 ```
 
-```
-feat(domain): add invoice schema, normalizer, and validation rules
-
-Co-authored-by: Cursor <agent@cursor.com>
+```text
+feat(domain): add invoice schema validation rules
 ```
 
 ## Rules
 
-- One logical change per commit when possible.
-- Never commit `.env` or secrets.
-- Always include the co-author trailer.
+- Keep each commit focused on one logical change where practical.
+- Never commit `.env` files, API keys, or generated build output.
+- Write the summary in the imperative mood and keep it concise.

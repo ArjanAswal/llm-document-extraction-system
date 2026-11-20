@@ -1,5 +1,5 @@
 ---
-description: LLM utility invoice extraction — project conventions and invariants
+description: Project conventions and invariants for the invoice extraction pipeline
 globs:
   - "**/*"
 alwaysApply: true
@@ -7,29 +7,19 @@ alwaysApply: true
 
 # Project rules
 
-## Plan-first workflow
-
-1. Read `PLAN.md` and `docs/PHASES.md` before starting work.
-2. Work one phase at a time; stop at phase gates for verification.
-3. Do not begin the next phase until the gate is approved.
-
 ## Engineering standards
 
-- TypeScript strict mode; small, focused diffs.
-- Never commit `.env` or API keys.
-- Run tests before reporting a phase gate.
+- Use strict TypeScript and keep changes small and focused.
+- Never commit `.env` files or API keys.
+- Run the relevant tests and build before completing changes.
 - Match existing naming and module boundaries.
 
-## Invariants (non-negotiable)
+## Invariants
 
 See `docs/INVARIANTS.md`. Key points:
 
-- Zod schema is the single source of truth for extracted data shape.
-- `franc` is metadata-only — never translates or modifies LLM input.
+- The Zod schema is the single source of truth for extracted data shape.
+- `franc` is metadata-only and never translates or modifies LLM input.
 - All LLM calls go through `src/services/invoice-extractor.ts`.
-- Pipeline depends on `src/ports/` interfaces, not concrete services.
-- Domain layer has no LangChain imports.
-
-## Commits
-
-Follow `docs/COMMITS.md`: Conventional Commits + co-author trailer.
+- The pipeline depends on interfaces in `src/ports/`, not concrete services.
+- The domain layer has no LangChain imports.
