@@ -43,7 +43,7 @@ Before merging or releasing changes:
 - Run the extraction command when pipeline or CSV behavior changes; verify one row per sample PDF and the expected headers.
 - Run `npm run test:live` only when intentionally testing the configured Gemini API key.
 - Keep `.env.example` current when environment variables change.
-- Update README and `TESTING.md` when behavior, commands, or validation coverage changes.
+- Update `README.md` when behavior, commands, architecture, roadmap, or validation coverage changes.
 - Ensure no secrets or generated build files are staged.
 
 ## Commands
