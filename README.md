@@ -135,4 +135,4 @@ npm test
 ## See also
 
 - [TESTING.md](TESTING.md) — validation approach
-- [docs/INVARIANTS.md](docs/INVARIANTS.md) — project rules
+- [AGENTS.md](AGENTS.md) — repository and contribution guidelines

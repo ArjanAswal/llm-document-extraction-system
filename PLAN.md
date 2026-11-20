@@ -26,9 +26,7 @@ Extract structured utility-invoice fields from multilingual PDFs using Gemini, L
 
 - [README.md](README.md) — quickstart and architecture
 - [TESTING.md](TESTING.md) — validation strategy and test suite
-- [docs/INVARIANTS.md](docs/INVARIANTS.md) — architecture and data contracts
-- [docs/COMMITS.md](docs/COMMITS.md) — commit conventions
-- [docs/PHASES.md](docs/PHASES.md) — release verification checklist
+- [AGENTS.md](AGENTS.md) — engineering and repository instructions
 
 ## Pipeline flow
 
