@@ -160,7 +160,7 @@ npm run test:live     # optional live API smoke test
 
 - Add OCR support for scanned PDFs.
 - Add golden-file regression tests for extraction output.
-- Add labeled evaluation data and field-level quality metrics.
+- Add labeled test data and field-level quality metrics.
 - Calibrate confidence scores and add a retry policy.
 - Add output adapters such as JSON.
 - Add a gated CI job for live API smoke tests.
