@@ -1,6 +1,9 @@
 node_modules/
 dist/
 output/
+data/
+web/dist/
+coverage/
 .env
 .DS_Store
 *.log
