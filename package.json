@@ -12,7 +12,11 @@
     "test:live": "vitest run --config vitest.live.config.ts",
     "extract": "tsx src/cli/extract.ts",
     "server": "tsx src/cli/server.ts",
-    "worker": "tsx src/cli/worker.ts"
+    "worker": "tsx src/cli/worker.ts",
+    "web:dev": "vite --config web/vite.config.ts",
+    "web:typecheck": "tsc -p web/tsconfig.json",
+    "web:build": "vite build --config web/vite.config.ts",
+    "test:e2e": "npm run web:build && playwright test"
   },
   "keywords": [
     "llm",
@@ -32,12 +36,19 @@
     "dotenv": "^17.4.2",
     "franc": "^6.2.0",
     "pdf-parse": "^2.4.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
     "@types/node": "^25.9.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.2",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3",
+    "vite": "^7.1.2",
     "vitest": "^4.1.7"
   }
 }

@@ -382,10 +382,15 @@ export function createHttpServer(deps: HttpServerDeps): http.Server {
       }
 
       if (method === "GET" && (url.pathname === "/" || url.pathname.startsWith("/app"))) {
-        sendJson(res, 200, {
-          message: "API running",
-          web: "Run npm run web:dev for the dashboard",
-        });
+        await serveWebFile(deps.dataDir, url.pathname, res);
+        return;
+      }
+
+      if (
+        method === "GET" &&
+        (url.pathname.startsWith("/assets/") || url.pathname === "/favicon.ico")
+      ) {
+        await serveWebFile(deps.dataDir, url.pathname, res);
         return;
       }
 
@@ -395,10 +400,50 @@ export function createHttpServer(deps: HttpServerDeps): http.Server {
         sendJson(res, error.status, { error: error.message });
         return;
       }
+
       console.error(error);
       sendJson(res, 500, { error: error instanceof Error ? error.message : "Internal error" });
     }
   });
+}
+
+async function serveWebFile(
+  _dataDir: string,
+  requestPath: string,
+  res: ServerResponse,
+): Promise<void> {
+  const webRoot = path.resolve(process.cwd(), "web", "dist");
+  const relative =
+    requestPath === "/" || requestPath.startsWith("/app")
+      ? "index.html"
+      : requestPath.replace(/^\//, "");
+  const filePath = path.resolve(webRoot, relative);
+  if (!filePath.startsWith(`${webRoot}${path.sep}`)) {
+    throw new HttpError(404, "Not found");
+  }
+  try {
+    const data = await fs.readFile(filePath);
+    const contentType = filePath.endsWith(".js")
+      ? "text/javascript; charset=utf-8"
+      : filePath.endsWith(".css")
+        ? "text/css; charset=utf-8"
+        : filePath.endsWith(".html")
+          ? "text/html; charset=utf-8"
+          : "application/octet-stream";
+    res.writeHead(200, {
+      "content-type": contentType,
+      "content-length": data.length,
+      "cache-control": filePath.endsWith(".html")
+        ? "no-store"
+        : "public, max-age=31536000, immutable",
+    });
+    res.end(data);
+  } catch {
+    throw new HttpError(
+      404,
+      "Dashboard build not found. Run npm run web:build.",
+    );
+  }
 }
 
 function serveEvents(
@@ -425,7 +470,7 @@ function serveEvents(
     const events = deps.jobs.listEvents(jobId, ownerUserId, cursor);
     for (const event of events) {
       cursor = event.id;
-      res.write(`id: ${event.id}\nevent: ${event.type}\n`);
+      res.write(`id: ${event.id}\n`);
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     }
   };
