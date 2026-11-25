@@ -1,14 +1,4 @@
 import { expect, test } from "@playwright/test";
-import fs from "fs/promises";
-import path from "path";
-
-test.beforeAll(async () => {
-  await fs.rm(path.join(process.cwd(), ".e2e-data"), {
-    recursive: true,
-    force: true,
-  });
-});
-
 test("uploads a PDF and downloads the completed CSV", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Create account" }).click();
