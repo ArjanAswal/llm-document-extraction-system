@@ -121,7 +121,19 @@ export class JobWorker {
           throw new Error(`Snapshot hash mismatch: ${document.sourceFile}`);
         }
 
-        const record = await processInvoiceFile(document.storagePath, this.deps);
+        let record: InvoiceRecord;
+        try {
+          record = await processInvoiceFile(document.storagePath, this.deps);
+        } catch (error) {
+          this.jobs.saveDocumentFailure(
+            jobId,
+            document.id,
+            ownerUserId,
+            leaseToken,
+            error instanceof Error ? error.message : String(error),
+          );
+          throw error;
+        }
         if (
           !this.jobs.saveDocumentResult(
             jobId,

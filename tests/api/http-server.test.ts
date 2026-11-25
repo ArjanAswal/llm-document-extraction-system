@@ -167,6 +167,25 @@ describe("HTTP application", () => {
     expect(old.status).toBe(401);
   });
 
+  it("returns 403 for a missing current password without changing credentials", async () => {
+    const account = await registerAndLogin("a@example.test", "LongPassword123!");
+    const response = await fetch(`${baseUrl}/api/password/change`, {
+      method: "POST",
+      headers: {
+        cookie: account.cookie,
+        "x-csrf-token": account.csrfToken,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ newPassword: "NewLongPassword456!" }),
+    });
+    expect(response.status).toBe(403);
+    expect(
+      await fetch(`${baseUrl}/api/session`, {
+        headers: { cookie: account.cookie },
+      }).then((result) => result.status),
+    ).toBe(200);
+  });
+
   it("makes deleted-account jobs inaccessible", async () => {
     const account = await registerAndLogin("a@example.test", "LongPassword123!");
     const upload = await fetch(`${baseUrl}/api/jobs`, {

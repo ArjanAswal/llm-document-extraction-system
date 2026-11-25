@@ -206,7 +206,16 @@ export function createHttpServer(deps: HttpServerDeps): http.Server {
       if (method === "POST" && url.pathname === "/api/password/change") {
         const session = authenticate(req);
         requireCsrf(req, session.token);
-        const parsed = PasswordChangeSchema.safeParse(await readJson(req));
+        const body = await readJson(req);
+        if (
+          typeof body !== "object" ||
+          body === null ||
+          !("currentPassword" in body) ||
+          typeof (body as { currentPassword?: unknown }).currentPassword !== "string"
+        ) {
+          throw new HttpError(403, "Current password is required");
+        }
+        const parsed = PasswordChangeSchema.safeParse(body);
         if (!parsed.success) throw new HttpError(400, "Invalid password payload");
         try {
           auth.changePassword(
