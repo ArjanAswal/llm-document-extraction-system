@@ -512,7 +512,7 @@ export class SqliteStore implements AuthStorePort, JobStorePort, QueuePort {
       this.db
         .prepare(
           `UPDATE jobs
-           SET state = 'queued', next_attempt_at = ?, cancel_requested = 0,
+           SET state = 'queued', attempt = 0, next_attempt_at = ?, cancel_requested = 0,
                error = NULL, lease_token = NULL, lease_expires_at = NULL,
                worker_id = NULL, updated_at = ?
            WHERE id = ? AND owner_user_id = ?`,

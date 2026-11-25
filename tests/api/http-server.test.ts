@@ -17,6 +17,7 @@ describe("HTTP application", () => {
   let tempDir: string;
   let db: DatabaseSync;
   let store: SqliteStore;
+  let auth: AuthService;
   let server: Server;
   let baseUrl: string;
 
@@ -26,9 +27,10 @@ describe("HTTP application", () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "invoice-http-"));
     db = createDatabase(tempDir);
     store = new SqliteStore(db, 5);
+    auth = new AuthService(store);
     server = createHttpServer({
       store,
-      auth: new AuthService(store),
+      auth,
       documents: new FileDocumentStore(tempDir, 1024 * 1024),
       jobs: store,
       queue: store,
@@ -115,6 +117,83 @@ describe("HTTP application", () => {
       headers: { cookie: account.cookie },
     });
     expect(afterLogout.status).toBe(401);
+  });
+
+  it("changes and resets passwords with full session revocation", async () => {
+    const account = await registerAndLogin("a@example.test", "LongPassword123!");
+    const changed = await fetch(`${baseUrl}/api/password/change`, {
+      method: "POST",
+      headers: {
+        cookie: account.cookie,
+        "x-csrf-token": account.csrfToken,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        currentPassword: "LongPassword123!",
+        newPassword: "NewLongPassword456!",
+      }),
+    });
+    expect(changed.status).toBe(200);
+    expect(
+      await fetch(`${baseUrl}/api/session`, {
+        headers: { cookie: account.cookie },
+      }).then((response) => response.status),
+    ).toBe(401);
+
+    await fetch(`${baseUrl}/api/password/forgot`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: "a@example.test" }),
+    });
+    const row = db
+      .prepare("SELECT id FROM email_outbox ORDER BY created_at DESC LIMIT 1")
+      .get() as { id: string };
+    const payload = auth.readOutboxPayload(row.id) as { link: string };
+    const token = new URL(payload.link).searchParams.get("token")!;
+    const reset = await fetch(`${baseUrl}/api/password/reset`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token, newPassword: "ResetPassword789!" }),
+    });
+    expect(reset.status).toBe(200);
+    const old = await fetch(`${baseUrl}/api/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: "a@example.test",
+        password: "NewLongPassword456!",
+      }),
+    });
+    expect(old.status).toBe(401);
+  });
+
+  it("makes deleted-account jobs inaccessible", async () => {
+    const account = await registerAndLogin("a@example.test", "LongPassword123!");
+    const upload = await fetch(`${baseUrl}/api/jobs`, {
+      method: "POST",
+      headers: {
+        cookie: account.cookie,
+        "x-csrf-token": account.csrfToken,
+        "content-type": `multipart/form-data; boundary=${"boundary"}`,
+      },
+      body: multipart([{ name: "invoice.pdf", content: PDF_BYTES }]),
+    });
+    const { id } = (await upload.json()) as { id: string };
+    const deletion = await fetch(`${baseUrl}/api/account`, {
+      method: "DELETE",
+      headers: {
+        cookie: account.cookie,
+        "x-csrf-token": account.csrfToken,
+      },
+    });
+    expect(deletion.status).toBe(204);
+    expect(
+      await fetch(`${baseUrl}/api/jobs/${id}`, {
+        headers: { cookie: account.cookie },
+      }).then((response) => response.status),
+    ).toBe(401);
+    const persisted = store.getJob(id);
+    expect(persisted?.state).toBe("cancelled");
   });
 
   async function registerAndLogin(email: string, password: string) {
