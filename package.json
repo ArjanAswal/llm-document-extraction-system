@@ -27,7 +27,7 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.16"
   },
   "dependencies": {
     "@langchain/core": "^1.1.48",
