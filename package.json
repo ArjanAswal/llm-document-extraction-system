@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:live": "vitest run --config vitest.live.config.ts",
     "extract": "tsx src/cli/extract.ts",
+    "server": "tsx src/cli/server.ts",
     "worker": "tsx src/cli/worker.ts"
   },
   "keywords": [
