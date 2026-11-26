@@ -26,6 +26,27 @@
     "langchain"
   ],
   "license": "MIT",
+  "overrides": {
+    "@babel/generator": "7.29.12",
+    "@babel/helper-module-transforms": "7.29.7",
+    "@babel/helper-string-parser": "7.29.11",
+    "@babel/helpers": "7.29.10",
+    "@babel/parser": "7.29.12",
+    "@babel/runtime": "7.29.10",
+    "@babel/traverse": "7.29.12",
+    "@babel/types": "7.29.11",
+    "@jridgewell/resolve-uri": "3.1.2",
+    "@types/estree": "1.0.10",
+    "baseline-browser-mapping": "2.11.35",
+    "browserslist": "4.29.5",
+    "caniuse-lite": "1.0.30001820",
+    "csstype": "3.2.3",
+    "electron-to-chromium": "1.5.475",
+    "node-releases": "2.0.63",
+    "rollup": "4.67.4",
+    "update-browserslist-db": "1.3.4",
+    "ws": "8.22.1"
+  },
   "engines": {
     "node": ">=22.16"
   },
